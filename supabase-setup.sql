@@ -38,8 +38,9 @@ create policy "Anyone can resolve comments"
   using (true)
   with check (true);
 
+-- Start from no access, then allow only what the page needs.
 -- New comments always start active; only the resolved columns can be updated.
-revoke insert, update on public.comments from anon;
+revoke all on public.comments from anon, authenticated;
 grant select on public.comments to anon;
 grant insert (name, body, ref) on public.comments to anon;
 grant update (resolved, resolved_at) on public.comments to anon;
