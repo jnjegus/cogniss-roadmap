@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Cogniss Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Light-only. Layout: quarter columns on a quiet grid, "now" column lifted; comments as a single reading column below. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --fg: #14171f;
+  --muted: #5f6675;
+  --line: #e2e5eb;
+  --accent: #2f5bd3;
+  --accent-soft: #e8eefc;
+  --done: #1f8a5b;
+  --done-soft: #e3f4ec;
+  --plan: #7a8191;
+  --plan-soft: #eef0f3;
+  --explore: #a2620f;
+  --explore-soft: #fbf0e0;
+  --danger: #c23a3a;
+  --shadow: 0 1px 2px rgba(20,23,31,.04), 0 8px 24px rgba(20,23,31,.06);
+  --f-body: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+[hidden] { display: none !important; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+button, input, textarea, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.label { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Lock screen ---------- */
+#lock { min-height: 100%; display: grid; place-items: center; padding: 32px 16px; }
+.lock-card { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 20px; }
+.lock-mark { width: 40px; height: 40px; border-radius: 10px; background: var(--fg); display: grid; place-items: center; }
+.lock-mark svg { width: 20px; height: 20px; }
+.lock-card h1 { font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+.lock-card p { margin: 4px 0 0; color: var(--muted); }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.input { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); transition: border-color .15s; }
+.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: 10px; border: 1px solid transparent; background: var(--fg); color: var(--bg); font-weight: 500; cursor: pointer; transition: opacity .15s; }
+.btn:hover { opacity: .88; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn-ghost { background: transparent; color: var(--muted); border-color: var(--line); }
+.err { color: var(--danger); font-size: 13.5px; min-height: 1.4em; margin: 0; }
+.shake { animation: shake .35s; }
+@keyframes shake { 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
+
+/* ---------- App ---------- */
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: 24px; padding-block: 40px 80px; display: flex; flex-direction: column; gap: 56px; }
+@media (max-width: 600px) { .wrap { padding-inline: 16px; padding-block: 24px 56px; gap: 40px; } }
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px; }
+header.top h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -.025em; line-height: 1.1; margin-top: 8px; }
+header.top .sub { color: var(--muted); margin: 6px 0 0; max-width: 60ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px 5px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; cursor: pointer; transition: opacity .15s, border-color .15s; }
+.chip[aria-pressed="false"] { opacity: .45; }
+.chip:hover { border-color: var(--muted); }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.s-shipped { --c: var(--done); --cs: var(--done-soft); }
+.s-progress { --c: var(--accent); --cs: var(--accent-soft); }
+.s-planned { --c: var(--plan); --cs: var(--plan-soft); }
+.s-exploring { --c: var(--explore); --cs: var(--explore-soft); }
+.dot { background: var(--c); }
+.s-exploring .dot { background: transparent; border: 1.5px dashed var(--c); }
+
+.board-scroll { overflow-x: auto; margin-inline: -4px; padding: 4px; }
+.board { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(260px, 1fr)); gap: 20px; }
+@media (max-width: 860px) { .board { grid-template-columns: 1fr; } }
+.col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.col-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 0 4px 10px; border-bottom: 1px solid var(--line); }
+.col-head h2 { font-size: 15px; font-weight: 600; }
+.col-head .range { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.col.now .col-head { border-bottom: 2px solid var(--accent); padding-bottom: 9px; }
+.now-tag { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 2px 7px; border-radius: 999px; margin-left: 8px; vertical-align: 2px; }
+.item { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 14px 13px; display: flex; flex-direction: column; gap: 8px; transition: border-color .15s, box-shadow .15s; }
+.item:hover { border-color: color-mix(in srgb, var(--c) 45%, var(--line)); box-shadow: var(--shadow); }
+.item h3 { font-size: 14.5px; font-weight: 600; line-height: 1.35; }
+.item p { margin: 0; font-size: 13.5px; color: var(--muted); }
+.item-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--c); background: var(--cs); padding: 3px 9px 3px 8px; border-radius: 999px; }
+.area { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); }
+.progress { height: 3px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.progress > span { display: block; height: 100%; background: var(--c); border-radius: 3px; }
+.item .discuss { align-self: flex-start; background: none; border: 0; padding: 0; font-size: 12.5px; color: var(--muted); cursor: pointer; display: inline-flex; gap: 5px; align-items: center; }
+.item .discuss:hover { color: var(--accent); }
+.empty-col { color: var(--muted); font-size: 13px; padding: 12px 4px; }
+
+/* ---------- Comments ---------- */
+.comments { max-width: 720px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+/* One control scale for the comments area: 40px fields and buttons, 10px radius, 14px text; 30px for compact controls. */
+.comments { --ctl-h: 40px; --ctl-r: 10px; --ctl-sm: 30px; --pad: 16px; }
+.comments-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.comments-head h2 { font-size: 20px; font-weight: 600; letter-spacing: -.01em; }
+.composer { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: var(--pad); display: flex; flex-direction: column; gap: 12px; }
+.ctl { height: var(--ctl-h); padding: 0 14px; border-radius: var(--ctl-r); border: 1px solid var(--line); background: var(--surface); font-size: 14px; min-width: 0; transition: border-color .15s, box-shadow .15s; }
+.ctl:hover { border-color: color-mix(in srgb, var(--muted) 40%, var(--line)); }
+.ctl:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+textarea.ctl { height: auto; min-height: 112px; padding: 10px 14px; line-height: 1.55; resize: vertical; display: block; width: 100%; }
+select.ctl { appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6675' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; }
+.composer .btn { height: var(--ctl-h); padding: 0 18px; border-radius: var(--ctl-r); font-size: 14px; flex: none; }
+.composer-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.composer-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.composer-foot .hint { margin: 0; font-size: 13px; color: var(--muted); }
+@media (max-width: 520px) { .composer-row { grid-template-columns: 1fr; } .composer .btn { width: 100%; } }
+.field-label { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field-label .ctl { width: 100%; }
+
+.seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: var(--ctl-r); background: var(--plan-soft); }
+.seg button { height: var(--ctl-sm); padding: 0 12px; border: 0; border-radius: 7px; background: transparent; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(20,23,31,.08); }
+.seg .n { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); }
+
+.note { color: var(--muted); font-size: 13.5px; margin: 0; }
+.note.bad { color: var(--danger); }
+.list { display: flex; flex-direction: column; }
+.c { display: grid; grid-template-columns: 32px 1fr; gap: 12px; padding: var(--pad) 0; border-top: 1px solid var(--line); }
+.c:first-child { border-top: 0; padding-top: 4px; }
+.initial { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 600; color: var(--accent); background: var(--accent-soft); }
+.c.resolved .initial { color: var(--done); background: var(--done-soft); }
+.c-body { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.c-top { display: flex; align-items: center; gap: 10px; min-height: var(--ctl-sm); }
+.c-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-width: 0; flex: 1; }
+.c-name { font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+.c-time { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); }
+.c-ref { font-size: 12px; color: var(--accent); background: var(--accent-soft); padding: 1px 8px; border-radius: 999px; }
+.c-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.c.resolved .c-text { color: var(--muted); }
+.resolve { flex: none; height: var(--ctl-sm); padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); font-size: 12.5px; font-weight: 500; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: color .15s, border-color .15s, background .15s; }
+.resolve:hover { color: var(--done); border-color: color-mix(in srgb, var(--done) 40%, var(--line)); background: var(--done-soft); }
+.resolve:disabled { opacity: .5; cursor: default; }
+.resolve.reopen:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); background: var(--accent-soft); }
+.empty { border: 1px dashed var(--line); border-radius: 14px; padding: 28px 20px; text-align: center; color: var(--muted); }
+.lock-again { height: var(--ctl-h); padding: 0 16px; font-size: 14px; align-self: flex-start; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- ============ PASSWORD GATE ============ -->
+<main id="lock">
+  <form class="lock-card" id="lockForm" autocomplete="off">
+    <div class="lock-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#f6f7f9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    </div>
+    <div>
+      <h1>Cogniss Roadmap</h1>
+      <p>Enter the password to view the roadmap.</p>
+    </div>
+    <div class="field">
+      <label class="label" for="pw">Password</label>
+      <input class="input" id="pw" type="password" autofocus required>
+    </div>
+    <p class="err" id="pwErr" role="alert"></p>
+    <button class="btn" type="submit">Unlock</button>
+  </form>
+</main>
+
+<!-- ============ ROADMAP ============ -->
+<div id="app" hidden>
+  <div class="wrap">
+    <header class="top">
+      <div>
+        <span class="label">Roadmap · October 2026 – Q1 2027</span>
+        <h1>Cogniss</h1>
+        <p class="sub">What we're building now, what's planned next, and what we're exploring.</p>
+      </div>
+      <div class="legend" id="legend" role="group" aria-label="Filter by status"></div>
+    </header>
+
+    <div class="board-scroll"><div class="board" id="board"></div></div>
+
+    <section class="comments" id="comments" aria-labelledby="cTitle">
+      <div class="comments-head">
+        <h2 id="cTitle">Comments</h2>
+      </div>
+      <form class="composer" id="composer">
+        <div class="composer-row">
+          <label class="field-label" for="cName"><span class="label">Name</span>
+            <input class="ctl" id="cName" type="text" placeholder="Your name" maxlength="80" autocomplete="name" required>
+          </label>
+          <label class="field-label" for="cRef"><span class="label">About</span>
+            <select class="ctl" id="cRef"><option value="">General</option></select>
+          </label>
+        </div>
+        <label class="field-label" for="cText"><span class="label">Comment</span>
+          <textarea class="ctl" id="cText" placeholder="Share feedback, questions, or ideas about the roadmap…" maxlength="2000" required></textarea>
+        </label>
+        <div class="composer-foot">
+          <p class="hint">Visible to everyone with the link.</p>
+          <button class="btn" id="cPost" type="submit" disabled>Post comment</button>
+        </div>
+      </form>
+      <div class="comments-head">
+        <div class="seg" role="group" aria-label="Show comments">
+          <button type="button" id="fActive" aria-pressed="true">Active <span class="n" id="nActive">0</span></button>
+          <button type="button" id="fArchived" aria-pressed="false">Archived <span class="n" id="nArchived">0</span></button>
+        </div>
+      </div>
+      <p class="note" id="cNote" hidden></p>
+      <div class="list" id="cList"></div>
+      <button class="btn btn-ghost lock-again" id="relock" type="button">Lock roadmap</button>
+    </section>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   SETTINGS — edit these
+   ===================================================================== */
+
+/* Comments database (Supabase). Paste your project URL and its
+   publishable / anon key. Leave empty to run in local preview mode,
+   where comments are saved only in your own browser. */
+const SUPABASE_URL = "";
+const SUPABASE_KEY = "";
+
+/* SHA-256 of the password. Default password: roadmap2026
+   To change it, see README.md. */
+const PASSWORD_HASH = "a6ca41a0f514620efce96a5a629e15f6243dab225e0e2db66cd6eb54dc9c195f";
+
+/* Roadmap content */
+/* Columns appear in this order. `now: true` adds the "Now" tag. */
+const QUARTERS = [
+  { id: "month", name: "This month", range: "October", now: true },
+  { id: "q4-26", name: "Q4 2026", range: "Oct – Dec" },
+  { id: "q1-27", name: "Q1 2027", range: "Jan – Mar" },
+];
+/* Within a column, items are sorted in this status order. Only statuses in use appear in the filter. */
+const STATUSES = {
+  shipped:   { label: "Shipped" },
+  progress:  { label: "In progress" },
+  planned:   { label: "Planned" },
+  exploring: { label: "Exploring" },
+};
+/* Optional fields: `area` (small tag on the card), `pct` (progress bar for in-progress items). */
+const ITEMS = [
+  { id: "node-configs", q: "month", status: "progress", title: "Node configs", desc: "Saved per-step agent settings that SuperAdmin builds, Admin assigns to users, and users pick by name in chat." },
+  { id: "reports-final", q: "month", status: "progress", title: "Reports finalization", desc: "FE and BE finalization" },
+  { id: "reports-excel", q: "month", status: "progress", title: "Reports Excel export", desc: "Report export in XLS format" },
+
+  { id: "ai-workflows", q: "q4-26", status: "progress", title: "AI workflows", desc: "FE and BE finalization" },
+  { id: "connectors", q: "q4-26", status: "planned", title: "Connectors expansion", desc: "Adding more available Connectors" },
+  { id: "graphs-ontology", q: "q4-26", status: "planned", title: "Graphs and Ontology", desc: "Finalizing the full functionality + enhancements" },
+  { id: "deep-search", q: "q4-26", status: "planned", title: "Deep knowledge Database search", desc: "Enhanced functionality in Chat" },
+  { id: "dash-widgets", q: "q4-26", status: "planned", title: "Dashboard builder widgets expansion", desc: "New widget types (video, video embed, image, plain text)" },
+  { id: "superadmin-view", q: "q4-26", status: "planned", title: "SuperAdmin view", desc: "Implementation of the SuperAdmin dashboard" },
+  { id: "admin-dashboards", q: "q4-26", status: "exploring", title: "Admin Dashboards option", desc: "Option for Admins to edit the Dashboards" },
+
+  { id: "asset-mgmt", q: "q1-27", status: "planned", title: "Asset management", desc: "New module in the app" },
+  { id: "alerts", q: "q1-27", status: "planned", title: "Alerts", desc: "New module in the app" },
+];
+const STATUS_ORDER = Object.keys(STATUSES);
+const USED_STATUSES = STATUS_ORDER.filter(s => ITEMS.some(i => i.status === s));
+
+/* ===================================================================== */
+
+const $ = (id) => document.getElementById(id);
+/* Storage can be blocked (private mode, sandboxed previews), and even reading
+   window.sessionStorage can throw, so every access goes through try/catch. */
+const safe = (name) => ({
+  get(k) { try { return window[name].getItem(k); } catch { return null; } },
+  set(k, v) { try { window[name].setItem(k, v); } catch {} },
+  del(k) { try { window[name].removeItem(k); } catch {} },
+});
+const session = safe("sessionStorage");
+const local = safe("localStorage");
+const UNLOCK_KEY = "cogniss-roadmap-unlocked";
+const NAME_KEY = "cogniss-roadmap-name";
+const LOCAL_COMMENTS_KEY = "cogniss-roadmap-local-comments";
+const REMOTE = Boolean(SUPABASE_URL && SUPABASE_KEY);
+
+/* ---------- Password gate ---------- */
+async function sha256(text) {
+  const bytes = new TextEncoder().encode(text);
+  try {
+    const buf = await crypto.subtle.digest("SHA-256", bytes);
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  } catch {
+    return sha256Fallback(bytes); // crypto.subtle is missing outside secure contexts
+  }
+}
+
+function sha256Fallback(bytes) {
+  const K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  const H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const len = bytes.length, total = ((len + 9 + 63) >> 6) << 6;
+  const m = new Uint8Array(total); m.set(bytes); m[len] = 0x80;
+  const dv = new DataView(m.buffer);
+  dv.setUint32(total - 8, Math.floor(len / 0x20000000)); dv.setUint32(total - 4, (len << 3) >>> 0);
+  const w = new Uint32Array(64), rotr = (x, n) => (x >>> n) | (x << (32 - n));
+  for (let o = 0; o < total; o += 64) {
+    for (let i = 0; i < 16; i++) w[i] = dv.getUint32(o + i * 4);
+    for (let i = 16; i < 64; i++) {
+      const s0 = rotr(w[i-15], 7) ^ rotr(w[i-15], 18) ^ (w[i-15] >>> 3);
+      const s1 = rotr(w[i-2], 17) ^ rotr(w[i-2], 19) ^ (w[i-2] >>> 10);
+      w[i] = (w[i-16] + s0 + w[i-7] + s1) >>> 0;
+    }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i++) {
+      const t1 = (h + (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) >>> 0;
+      const t2 = ((rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) >>> 0;
+      h = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+    }
+    [a, b, c, d, e, f, g, h].forEach((v, i) => { H[i] = (H[i] + v) >>> 0; });
+  }
+  return H.map(x => x.toString(16).padStart(8, "0")).join("");
+}
+
+$("lockForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  let ok = false;
+  try { ok = (await sha256($("pw").value)) === PASSWORD_HASH; } catch {}
+  if (ok) { session.set(UNLOCK_KEY, PASSWORD_HASH); unlock(); return; }
+  $("pwErr").textContent = "That password isn't right. Check it and try again.";
+  const card = $("lockForm");
+  card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+  $("pw").select();
+});
+
+$("relock").addEventListener("click", () => {
+  session.del(UNLOCK_KEY);
+  $("app").hidden = true; $("lock").hidden = false;
+  $("pw").value = ""; $("pwErr").textContent = ""; $("pw").focus();
+});
+
+let started = false;
+function unlock() {
+  $("lock").hidden = true; $("app").hidden = false;
+  if (!started) { started = true; renderRoadmap(); startComments(); }
+}
+
+/* ---------- Roadmap ---------- */
+const active = new Set(USED_STATUSES);
+function renderRoadmap() {
+  const legend = $("legend");
+  legend.innerHTML = "";
+  for (const key of USED_STATUSES) {
+    const s = STATUSES[key];
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip s-" + key;
+    b.setAttribute("aria-pressed", active.has(key));
+    b.innerHTML = '<span class="dot"></span>'; b.append(s.label);
+    b.onclick = () => {
+      const all = USED_STATUSES;
+      if (active.has(key) && active.size === 1) all.forEach(k => active.add(k));
+      else if (active.size === all.length) { active.clear(); active.add(key); }
+      else active.has(key) ? active.delete(key) : active.add(key);
+      renderRoadmap();
+    };
+    legend.append(b);
+  }
+
+  const board = $("board");
+  board.style.setProperty("--cols", QUARTERS.length);
+  board.innerHTML = "";
+  for (const q of QUARTERS) {
+    const col = document.createElement("section");
+    col.className = "col" + (q.now ? " now" : "");
+    const head = document.createElement("div"); head.className = "col-head";
+    const h = document.createElement("h2"); h.textContent = q.name;
+    if (q.now) { const t = document.createElement("span"); t.className = "now-tag"; t.textContent = "Now"; h.append(t); }
+    const r = document.createElement("span"); r.className = "range"; r.textContent = q.range;
+    head.append(h, r); col.append(head);
+
+    const items = ITEMS.filter(i => i.q === q.id && active.has(i.status))
+      .sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status));
+    if (!items.length) {
+      const e = document.createElement("div"); e.className = "empty-col"; e.textContent = "Nothing here for this filter.";
+      col.append(e);
+    }
+    for (const it of items) {
+      const card = document.createElement("article"); card.className = "item s-" + it.status;
+      const meta = document.createElement("div"); meta.className = "item-meta";
+      const st = document.createElement("span"); st.className = "status";
+      st.innerHTML = '<span class="dot"></span>'; st.append(STATUSES[it.status].label);
+      meta.append(st);
+      if (it.area) { const area = document.createElement("span"); area.className = "area"; area.textContent = it.area; meta.append(area); }
+      const t = document.createElement("h3"); t.textContent = it.title;
+      const d = document.createElement("p"); d.textContent = it.desc;
+      card.append(meta, t, d);
+      if (it.status === "progress" && it.pct != null) {
+        const p = document.createElement("div"); p.className = "progress";
+        p.setAttribute("role", "progressbar"); p.setAttribute("aria-valuenow", it.pct); p.setAttribute("aria-label", it.pct + "% complete");
+        const s = document.createElement("span"); s.style.width = it.pct + "%"; p.append(s); card.append(p);
+      }
+      const disc = document.createElement("button"); disc.type = "button"; disc.className = "discuss";
+      disc.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+      disc.append("Comment on this");
+      disc.onclick = () => {
+        $("cRef").value = it.id;
+        $("comments").scrollIntoView({ behavior: "smooth", block: "start" });
+        ($("cName").value.trim() ? $("cText") : $("cName")).focus({ preventScroll: true });
+      };
+      card.append(disc); col.append(card);
+    }
+    board.append(col);
+  }
+
+  const sel = $("cRef");
+  if (sel.options.length === 1) {
+    for (const it of ITEMS) { const o = document.createElement("option"); o.value = it.id; o.textContent = it.title; sel.append(o); }
+  }
+}
+
+/* ---------- Comments ----------
+   Supabase table "comments": id, created_at, name, body, ref, resolved, resolved_at (see supabase-setup.sql). */
+let comments = [];
+let view = "active";
+const busy = new Set();
+
+function note(msg, bad) { const n = $("cNote"); n.textContent = msg || ""; n.hidden = !msg; n.classList.toggle("bad", !!bad); }
+
+/* Preview mode: kept in memory, and in localStorage when the browser allows it. */
+let memoryComments = null;
+function saveLocal(list) { memoryComments = list; local.set(LOCAL_COMMENTS_KEY, JSON.stringify(list)); }
+
+const api = {
+  async list() {
+    if (!REMOTE) {
+      if (memoryComments) return memoryComments.slice();
+      try { memoryComments = JSON.parse(local.get(LOCAL_COMMENTS_KEY) || "[]"); } catch { memoryComments = []; }
+      return memoryComments.slice();
+    }
+    const res = await fetch(SUPABASE_URL.replace(/\/$/, "") + "/rest/v1/comments?select=id,created_at,name,body,ref,resolved,resolved_at&order=created_at.desc&limit=1000", {
+      headers: { apikey: SUPABASE_KEY },
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  },
+  async add(row) {
+    if (!REMOTE) {
+      const list = await api.list();
+      list.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), created_at: new Date().toISOString(), resolved: false, resolved_at: null, ...row });
+      saveLocal(list);
+      return;
+    }
+    const res = await fetch(SUPABASE_URL.replace(/\/$/, "") + "/rest/v1/comments", {
+      method: "POST",
+      headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: JSON.stringify(row),
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+  },
+  async setResolved(id, resolved) {
+    const patch = { resolved, resolved_at: resolved ? new Date().toISOString() : null };
+    if (!REMOTE) {
+      saveLocal((await api.list()).map(c => c.id === id ? { ...c, ...patch } : c));
+      return;
+    }
+    const res = await fetch(SUPABASE_URL.replace(/\/$/, "") + "/rest/v1/comments?id=eq." + encodeURIComponent(id), {
+      method: "PATCH",
+      headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: JSON.stringify(patch),
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+  },
+};
+
+function setView(v) {
+  view = v;
+  $("fActive").setAttribute("aria-pressed", v === "active");
+  $("fArchived").setAttribute("aria-pressed", v === "archived");
+  renderComments();
+}
+$("fActive").addEventListener("click", () => setView("active"));
+$("fArchived").addEventListener("click", () => setView("archived"));
+
+async function toggleResolved(c) {
+  busy.add(c.id); renderComments();
+  try {
+    await api.setResolved(c.id, !c.resolved);
+    note(REMOTE ? "" : $("cNote").textContent);
+    await refresh(false);
+  } catch {
+    note(c.resolved ? "That comment couldn't be reopened. Try again." : "That comment couldn't be marked as resolved. Try again.", true);
+  }
+  busy.delete(c.id); renderComments();
+}
+
+async function refresh(showErrors) {
+  try {
+    comments = await api.list();
+    renderComments();
+  } catch {
+    if (showErrors) note("Comments couldn't load. Check your connection and reload the page.", true);
+  }
+}
+
+function startComments() {
+  $("cName").value = local.get(NAME_KEY) || "";
+  if (!REMOTE) note("Preview mode: comments are saved only in this browser until the comments database is connected.");
+  updatePostButton();
+  refresh(true);
+  if (REMOTE) setInterval(() => { if (!document.hidden) refresh(false); }, 30000);
+}
+
+function updatePostButton() { $("cPost").disabled = !$("cName").value.trim() || !$("cText").value.trim(); }
+$("cName").addEventListener("input", updatePostButton);
+$("cText").addEventListener("input", updatePostButton);
+
+$("composer").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = $("cName").value.trim();
+  const body = $("cText").value.trim();
+  if (!name) { $("cName").focus(); return; }
+  if (!body) { $("cText").focus(); return; }
+  $("cPost").disabled = true;
+  try {
+    await api.add({ name, body, ref: $("cRef").value || "" });
+    local.set(NAME_KEY, name);
+    $("cText").value = ""; $("cRef").value = "";
+    if (REMOTE) note("");
+    await refresh(true);
+  } catch {
+    note("Your comment didn't post. Check your connection and try again.", true);
+  }
+  updatePostButton();
+});
+
+function timeAgo(iso) {
+  const ts = new Date(iso).getTime();
+  const s = Math.max(0, (Date.now() - ts) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return Math.floor(s / 60) + "m ago";
+  if (s < 86400) return Math.floor(s / 3600) + "h ago";
+  if (s < 86400 * 7) return Math.floor(s / 86400) + "d ago";
+  return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+function renderComments() {
+  const list = $("cList");
+  const active = comments.filter(c => !c.resolved);
+  const archived = comments.filter(c => c.resolved);
+  $("nActive").textContent = active.length;
+  $("nArchived").textContent = archived.length;
+  const shown = view === "active" ? active : archived;
+  list.innerHTML = "";
+  if (!shown.length) {
+    const e = document.createElement("div"); e.className = "empty";
+    e.textContent = view === "archived" ? "No archived comments. Comments you mark as resolved show up here."
+      : archived.length ? "All comments are resolved. Nice work." : "No comments yet. Be the first to leave one.";
+    list.append(e); return;
+  }
+  for (const c of shown) {
+    const row = document.createElement("article"); row.className = "c" + (c.resolved ? " resolved" : "");
+    const ini = document.createElement("div"); ini.className = "initial"; ini.setAttribute("aria-hidden", "true");
+    ini.textContent = (String(c.name || "?").trim()[0] || "?").toUpperCase();
+    const body = document.createElement("div"); body.className = "c-body";
+    const top = document.createElement("div"); top.className = "c-top";
+    const meta = document.createElement("div"); meta.className = "c-meta";
+    const name = document.createElement("span"); name.className = "c-name"; name.textContent = c.name || "Anonymous";
+    const time = document.createElement("span"); time.className = "c-time"; time.textContent = timeAgo(c.created_at);
+    time.title = new Date(c.created_at).toLocaleString();
+    meta.append(name, time);
+    const ref = ITEMS.find(i => i.id === c.ref);
+    if (ref) { const r = document.createElement("span"); r.className = "c-ref"; r.textContent = ref.title; meta.append(r); }
+    if (c.resolved && c.resolved_at) {
+      const rs = document.createElement("span"); rs.className = "c-time"; rs.textContent = "· resolved " + timeAgo(c.resolved_at); meta.append(rs);
+    }
+    const btn = document.createElement("button"); btn.type = "button";
+    btn.className = "resolve" + (c.resolved ? " reopen" : "");
+    btn.disabled = busy.has(c.id);
+    btn.innerHTML = c.resolved
+      ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>'
+      : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+    btn.append(c.resolved ? "Reopen" : "Mark as resolved");
+    btn.onclick = () => toggleResolved(c);
+    top.append(meta, btn);
+    const text = document.createElement("p"); text.className = "c-text"; text.textContent = c.body;
+    body.append(top, text);
+    row.append(ini, body);
+    list.append(row);
+  }
+}
+
+/* Stay unlocked for this browser tab */
+if (session.get(UNLOCK_KEY) === PASSWORD_HASH) unlock();
+</script>
+</body>
+</html>
