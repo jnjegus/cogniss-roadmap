@@ -61,16 +61,16 @@ button, input, textarea, select { font: inherit; color: inherit; }
 /* ---------- App ---------- */
 .wrap { max-width: 1200px; margin: 0 auto; padding-inline: 24px; padding-block: 40px 80px; display: flex; flex-direction: column; gap: 56px; }
 @media (max-width: 600px) { .wrap { padding-inline: 16px; padding-block: 24px 56px; gap: 40px; } }
-header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px; }
+header.top { display: flex; flex-direction: column; gap: 20px; }
+header.top .updated { font-weight: 700; color: var(--fg); }
 header.top h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -.025em; line-height: 1.1; margin-top: 8px; }
 header.top .sub { color: var(--muted); margin: 6px 0 0; max-width: 60ch; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px; }
 .roadmap-area { display: flex; flex-direction: column; gap: 32px; }
-.top-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.top-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
 .pdf-btn { height: 32px; padding: 0 12px; border-radius: 999px; font-size: 13px; background: var(--surface); color: var(--fg); }
 .pdf-btn:hover { opacity: 1; border-color: var(--muted); }
 .pdf-btn[aria-busy="true"] { cursor: progress; opacity: .6; }
-.export-date { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
 .chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px 5px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; cursor: pointer; transition: opacity .15s, border-color .15s; }
 .chip[aria-pressed="false"] { opacity: .45; }
 .chip:hover { border-color: var(--muted); }
@@ -182,12 +182,11 @@ select.ctl { appearance: none; -webkit-appearance: none; padding-right: 36px; cu
     <div id="roadmapExport" class="roadmap-area">
     <header class="top">
       <div>
-        <span class="label">Roadmap · October 2026 – Q1 2027</span>
+        <span class="label">Roadmap · October 2026 – Q1 2027<span id="updatedWrap" hidden> · <strong class="updated" id="updated"></strong></span></span>
         <h1>Cogniss</h1>
         <p class="sub">What we're building now, what's planned next, and what we're exploring.</p>
       </div>
       <div class="top-tools">
-        <span class="export-date" id="updated"></span>
         <div class="legend" id="legend" role="group" aria-label="Filter by status"></div>
         <button class="btn btn-ghost pdf-btn" id="pdfBtn" type="button">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
@@ -265,13 +264,11 @@ const STATUSES = {
 };
 /* Within a column, cards are sorted in this order: current work first, finished work last. */
 const CARD_ORDER = ["progress", "planned", "exploring", "shipped"];
-/* Shown next to the status key, on the page and in the PDF. Change it whenever you edit the roadmap. */
-const ROADMAP_UPDATED = "2026-10-12";
 /* Optional fields: `area` (small tag on the card), `pct` (progress bar for in-progress items). */
 const ITEMS = [
   { id: "node-configs", q: "month", status: "progress", title: "Node configs", desc: "Saved per-step agent settings that SuperAdmin builds, Admin assigns to users, and users pick by name in chat." },
   { id: "reports-final", q: "month", status: "progress", title: "Reports finalization", desc: "FE and BE finalization" },
-  { id: "chat-excel", q: "month", status: "shipped", title: "Chat results Excel export", desc: "Export of chat results to XLS when the answer contains a table. Shipped last week." },
+  { id: "chat-excel", q: "month", status: "shipped", title: "Chat results Excel export", desc: "Export of chat results to XLS when the answer contains a table. Shipped in early October." },
 
   { id: "ai-workflows", q: "q4-26", status: "progress", title: "AI workflows", desc: "FE and BE finalization" },
   { id: "connectors", q: "q4-26", status: "planned", title: "Connectors expansion", desc: "Adding more available Connectors" },
@@ -361,14 +358,27 @@ $("relock").addEventListener("click", () => {
 let started = false;
 function unlock() {
   $("lock").hidden = true; $("app").hidden = false;
-  if (!started) { started = true; renderRoadmap(); startComments(); }
+  if (!started) { started = true; renderRoadmap(); showUpdatedDate(); startComments(); }
+}
+
+/* "Updated" date = when this page was last published. GitHub Pages sends it as the
+   Last-Modified header on every deploy; locally we fall back to the browser's value. */
+async function showUpdatedDate() {
+  let when = null;
+  try {
+    const res = await fetch(location.href.split("#")[0], { method: "HEAD", cache: "no-store" });
+    const lm = res.headers.get("Last-Modified");
+    if (lm) when = new Date(lm);
+  } catch {}
+  if (!when || isNaN(when)) when = new Date(document.lastModified);
+  if (isNaN(when)) return;
+  $("updated").textContent = "Updated " + when.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  $("updatedWrap").hidden = false;
 }
 
 /* ---------- Roadmap ---------- */
 const active = new Set(USED_STATUSES);
 function renderRoadmap() {
-  const [uy, um, ud] = ROADMAP_UPDATED.split("-").map(Number);
-  $("updated").textContent = "Updated " + new Date(uy, um - 1, ud).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   const legend = $("legend");
   legend.innerHTML = "";
   for (const key of USED_STATUSES) {
