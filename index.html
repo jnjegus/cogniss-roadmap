@@ -65,6 +65,12 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 header.top h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -.025em; line-height: 1.1; margin-top: 8px; }
 header.top .sub { color: var(--muted); margin: 6px 0 0; max-width: 60ch; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px; }
+.roadmap-area { display: flex; flex-direction: column; gap: 32px; }
+.top-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.pdf-btn { height: 32px; padding: 0 12px; border-radius: 999px; font-size: 13px; background: var(--surface); color: var(--fg); }
+.pdf-btn:hover { opacity: 1; border-color: var(--muted); }
+.pdf-btn[aria-busy="true"] { cursor: progress; opacity: .6; }
+.export-date { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
 .chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px 5px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; cursor: pointer; transition: opacity .15s, border-color .15s; }
 .chip[aria-pressed="false"] { opacity: .45; }
 .chip:hover { border-color: var(--muted); }
@@ -173,16 +179,25 @@ select.ctl { appearance: none; -webkit-appearance: none; padding-right: 36px; cu
 <!-- ============ ROADMAP ============ -->
 <div id="app" hidden>
   <div class="wrap">
+    <div id="roadmapExport" class="roadmap-area">
     <header class="top">
       <div>
         <span class="label">Roadmap · October 2026 – Q1 2027</span>
         <h1>Cogniss</h1>
         <p class="sub">What we're building now, what's planned next, and what we're exploring.</p>
       </div>
-      <div class="legend" id="legend" role="group" aria-label="Filter by status"></div>
+      <div class="top-tools">
+        <div class="legend" id="legend" role="group" aria-label="Filter by status"></div>
+        <button class="btn btn-ghost pdf-btn" id="pdfBtn" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          <span id="pdfLabel">Download PDF</span>
+        </button>
+      </div>
     </header>
 
     <div class="board-scroll"><div class="board" id="board"></div></div>
+    </div>
+    <p class="note bad" id="pdfErr" hidden></p>
 
     <section class="comments" id="comments" aria-labelledby="cTitle">
       <div class="comments-head">
@@ -587,6 +602,96 @@ function renderComments() {
     list.append(row);
   }
 }
+
+/* ---------- PDF export ----------
+   Captures only #roadmapExport (title + board), never the comments.
+   Libraries load on first click so the page stays light. */
+const PDF_LIBS = [
+  "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+];
+const EXPORT_WIDTH = 1400; // render at desktop width, even on phones
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const s = document.createElement("script");
+    s.src = src; s.onload = resolve; s.onerror = () => reject(new Error("Couldn't load " + src));
+    document.head.append(s);
+  });
+}
+
+async function buildRoadmapPdf() {
+  for (const src of PDF_LIBS) await loadScript(src);
+  try { await document.fonts.ready; } catch {}
+
+  // Export the full roadmap, whatever filter is on screen.
+  const saved = new Set(active);
+  USED_STATUSES.forEach(s => active.add(s));
+  renderRoadmap();
+
+  const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+  // Fixed-width copy, laid out with inline styles so the screen size and media queries don't matter.
+  const host = document.createElement("div");
+  host.setAttribute("aria-hidden", "true");
+  host.style.cssText = `position:absolute;left:-${EXPORT_WIDTH * 2}px;top:0;width:${EXPORT_WIDTH}px;`;
+  const copy = $("roadmapExport").cloneNode(true);
+  copy.removeAttribute("id");
+  copy.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
+  copy.style.cssText = `width:${EXPORT_WIDTH}px;padding:44px 52px 52px;background:#f6f7f9;gap:32px;`;
+  copy.querySelectorAll(".discuss, .pdf-btn").forEach(el => el.remove());
+  copy.querySelector("h1").style.fontSize = "40px";
+  copy.querySelector(".board-scroll").style.cssText = "overflow:visible;margin:0;padding:0;";
+  copy.querySelector(".board").style.gridTemplateColumns = `repeat(${QUARTERS.length}, minmax(0, 1fr))`;
+  // Legend becomes a static key: all chips at full strength.
+  copy.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", "true"));
+  const stamp = document.createElement("span");
+  stamp.className = "export-date";
+  stamp.textContent = "Exported " + today;
+  copy.querySelector(".top-tools").prepend(stamp);
+  host.append(copy);
+  document.body.append(host);
+
+  let canvas;
+  try {
+    canvas = await html2canvas(copy, { scale: 2, backgroundColor: "#f6f7f9", logging: false, windowWidth: EXPORT_WIDTH });
+  } finally {
+    host.remove();
+    active.clear(); saved.forEach(s => active.add(s));
+    renderRoadmap();
+  }
+
+  // One landscape page, A4 width, height follows the content so nothing gets cut mid-card.
+  const { jsPDF } = window.jspdf;
+  const pageW = 297;
+  const pageH = Math.max(210, pageW * canvas.height / canvas.width);
+  const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: [pageW, pageH], compress: true });
+  const imgH = pageW * canvas.height / canvas.width;
+  pdf.setFillColor(246, 247, 249);
+  pdf.rect(0, 0, pageW, pageH, "F");
+  pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, pageW, imgH);
+  pdf.setProperties({ title: "Cogniss Roadmap", subject: "Roadmap exported " + today });
+  return pdf;
+}
+
+$("pdfBtn").addEventListener("click", async () => {
+  const btn = $("pdfBtn");
+  if (btn.getAttribute("aria-busy") === "true") return;
+  btn.setAttribute("aria-busy", "true");
+  $("pdfLabel").textContent = "Preparing PDF…";
+  $("pdfErr").hidden = true;
+  try {
+    const pdf = await buildRoadmapPdf();
+    pdf.save("cogniss-roadmap-" + new Date().toISOString().slice(0, 10) + ".pdf");
+  } catch (err) {
+    $("pdfErr").textContent = "The PDF couldn't be created. Check your connection and try again.";
+    $("pdfErr").hidden = false;
+  } finally {
+    btn.removeAttribute("aria-busy");
+    $("pdfLabel").textContent = "Download PDF";
+  }
+});
 
 /* Stay unlocked for this browser tab */
 if (session.get(UNLOCK_KEY) === PASSWORD_HASH) unlock();
