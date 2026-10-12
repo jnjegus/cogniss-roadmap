@@ -187,6 +187,7 @@ select.ctl { appearance: none; -webkit-appearance: none; padding-right: 36px; cu
         <p class="sub">What we're building now, what's planned next, and what we're exploring.</p>
       </div>
       <div class="top-tools">
+        <span class="export-date" id="updated"></span>
         <div class="legend" id="legend" role="group" aria-label="Filter by status"></div>
         <button class="btn btn-ghost pdf-btn" id="pdfBtn" type="button">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
@@ -255,22 +256,26 @@ const QUARTERS = [
   { id: "q4-26", name: "Q4 2026", range: "Oct – Dec" },
   { id: "q1-27", name: "Q1 2027", range: "Jan – Mar" },
 ];
-/* Within a column, items are sorted in this status order. Only statuses in use appear in the filter. */
+/* The filter lists statuses in this order (only the ones in use). */
 const STATUSES = {
-  shipped:   { label: "Shipped" },
+  shipped:   { label: "Done" },
   progress:  { label: "In progress" },
   planned:   { label: "Planned" },
   exploring: { label: "Exploring" },
 };
+/* Within a column, cards are sorted in this order: current work first, finished work last. */
+const CARD_ORDER = ["progress", "planned", "exploring", "shipped"];
+/* Shown next to the status key, on the page and in the PDF. Change it whenever you edit the roadmap. */
+const ROADMAP_UPDATED = "2026-10-12";
 /* Optional fields: `area` (small tag on the card), `pct` (progress bar for in-progress items). */
 const ITEMS = [
   { id: "node-configs", q: "month", status: "progress", title: "Node configs", desc: "Saved per-step agent settings that SuperAdmin builds, Admin assigns to users, and users pick by name in chat." },
   { id: "reports-final", q: "month", status: "progress", title: "Reports finalization", desc: "FE and BE finalization" },
-  { id: "reports-excel", q: "month", status: "progress", title: "Reports Excel export", desc: "Report export in XLS format" },
+  { id: "chat-excel", q: "month", status: "shipped", title: "Chat results Excel export", desc: "Export of chat results to XLS when the answer contains a table. Shipped last week." },
 
   { id: "ai-workflows", q: "q4-26", status: "progress", title: "AI workflows", desc: "FE and BE finalization" },
   { id: "connectors", q: "q4-26", status: "planned", title: "Connectors expansion", desc: "Adding more available Connectors" },
-  { id: "graphs-ontology", q: "q4-26", status: "planned", title: "Graphs and Ontology", desc: "Finalizing the full functionality + enhancements" },
+  { id: "graphs-ontology", q: "q4-26", status: "planned", title: "Graphs and Ontology v2", desc: "Upgrade of the live v1: finalizing the full functionality + enhancements" },
   { id: "deep-search", q: "q4-26", status: "planned", title: "Deep knowledge Database search", desc: "Enhanced functionality in Chat" },
   { id: "dash-widgets", q: "q4-26", status: "planned", title: "Dashboard builder widgets expansion", desc: "New widget types (video, video embed, image, plain text)" },
   { id: "superadmin-view", q: "q4-26", status: "planned", title: "SuperAdmin view", desc: "Implementation of the SuperAdmin dashboard" },
@@ -362,6 +367,8 @@ function unlock() {
 /* ---------- Roadmap ---------- */
 const active = new Set(USED_STATUSES);
 function renderRoadmap() {
+  const [uy, um, ud] = ROADMAP_UPDATED.split("-").map(Number);
+  $("updated").textContent = "Updated " + new Date(uy, um - 1, ud).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   const legend = $("legend");
   legend.innerHTML = "";
   for (const key of USED_STATUSES) {
@@ -393,7 +400,7 @@ function renderRoadmap() {
     head.append(h, r); col.append(head);
 
     const items = ITEMS.filter(i => i.q === q.id && active.has(i.status))
-      .sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status));
+      .sort((a, b) => CARD_ORDER.indexOf(a.status) - CARD_ORDER.indexOf(b.status));
     if (!items.length) {
       const e = document.createElement("div"); e.className = "empty-col"; e.textContent = "Nothing here for this filter.";
       col.append(e);
@@ -646,10 +653,6 @@ async function buildRoadmapPdf() {
   copy.querySelector(".board").style.gridTemplateColumns = `repeat(${QUARTERS.length}, minmax(0, 1fr))`;
   // Legend becomes a static key: all chips at full strength.
   copy.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", "true"));
-  const stamp = document.createElement("span");
-  stamp.className = "export-date";
-  stamp.textContent = "Exported " + today;
-  copy.querySelector(".top-tools").prepend(stamp);
   host.append(copy);
   document.body.append(host);
 
