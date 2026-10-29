@@ -699,7 +699,8 @@ async function buildRoadmapPdf() {
   const { jsPDF } = window.jspdf;
   const pageW = 297;
   const pageH = Math.max(210, pageW * canvas.height / canvas.width);
-  const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: [pageW, pageH], compress: true });
+  // Orientation must match the page shape, or jsPDF swaps width and height and crops the image.
+  const pdf = new jsPDF({ orientation: pageH > pageW ? "portrait" : "landscape", unit: "mm", format: [pageW, pageH], compress: true });
   const imgH = pageW * canvas.height / canvas.width;
   pdf.setFillColor(246, 247, 249);
   pdf.rect(0, 0, pageW, pageH, "F");
