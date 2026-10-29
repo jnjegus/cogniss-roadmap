@@ -185,7 +185,7 @@ select.ctl { appearance: none; -webkit-appearance: none; padding-right: 36px; cu
     <div id="roadmapExport" class="roadmap-area">
     <header class="top">
       <div>
-        <span class="label">Roadmap · October 2026 – Q1 2027<span id="updatedWrap" hidden> · <strong class="updated" id="updated"></strong></span></span>
+        <span class="label">Roadmap · October 2026 – Q2 2027<span id="updatedWrap" hidden> · <strong class="updated" id="updated"></strong></span></span>
         <h1>Cogniss</h1>
         <p class="sub">What we're building now, what's planned next, and what we're exploring.</p>
       </div>
@@ -257,6 +257,7 @@ const QUARTERS = [
   { id: "month", name: "This month", range: "October", now: true },
   { id: "q4-26", name: "Q4 2026", range: "Oct – Dec" },
   { id: "q1-27", name: "Q1 2027", range: "Jan – Mar" },
+  { id: "q2-27", name: "Q2 2027", range: "Apr – Jun" },
 ];
 /* The filter lists statuses in this order (only the ones in use). */
 const STATUSES = {
@@ -275,8 +276,9 @@ const ITEMS = [
 
   { id: "ai-workflows", q: "q4-26", status: "progress", title: "AI workflows", desc: "FE and BE finalization" },
   { id: "connectors", q: "q4-26", status: "planned", title: "Connectors expansion", desc: "Adding more available Connectors" },
-  { id: "graphs-ontology", q: "q4-26", status: "planned", title: "Graphs and Ontology v2", desc: "Upgrade of the live v1: finalizing the full functionality + enhancements" },
   { id: "deep-search", q: "q4-26", status: "planned", title: "Deep knowledge Database search", desc: "Enhanced functionality in Chat" },
+  { id: "full-text-analysis", q: "q4-26", status: "planned", title: "Full text analysis toggle", desc: "Option in Chat to analyse whole documents, not just retrieved excerpts" },
+  { id: "sharepoint", q: "q4-26", status: "planned", title: "SharePoint connector", desc: "Connect SharePoint as a knowledge source" },
   { id: "knowledge-db-v2", q: "q4-26", status: "planned", title: "Knowledge Database v2", desc: "New data lake with modern and traditional view" },
   { id: "dash-widgets", q: "q4-26", status: "planned", title: "Dashboard builder widgets expansion", desc: "New widget types (video, video embed, image, plain text)" },
   { id: "superadmin-view", q: "q4-26", status: "planned", title: "SuperAdmin view", desc: "Implementation of the SuperAdmin dashboard" },
@@ -284,6 +286,20 @@ const ITEMS = [
 
   { id: "asset-mgmt", q: "q1-27", status: "planned", title: "Asset management", desc: "New module in the app" },
   { id: "alerts", q: "q1-27", status: "planned", title: "Alerts", desc: "New module in the app" },
+  { id: "graphs-ontology", q: "q1-27", status: "planned", title: "Graphs and Ontology v2", desc: "Upgrade of the live v1: finalizing the full functionality + enhancements" },
+  { id: "workflow-widgets", q: "q1-27", status: "planned", title: "Widgets updated by workflows", desc: "Dashboard widgets refreshed automatically from workflow outputs" },
+  { id: "file-from-reference", q: "q1-27", status: "planned", title: "File generation from a reference file", desc: "Generate new files that follow the structure of an uploaded reference" },
+  { id: "chat-sources", q: "q1-27", status: "planned", title: "Chat sources", desc: "Choose which sources Chat answers from" },
+  { id: "external-sources", q: "q1-27", status: "planned", title: "External sources", desc: "Connect external systems and databases as tenant data sources" },
+  { id: "workflow-refine-ai", q: "q1-27", status: "planned", title: "Workflow builder: Refine with AI", desc: "Build and improve workflows with an AI assistant" },
+  { id: "chat-widgets", q: "q1-27", status: "planned", title: "Widgets in Chat", desc: "Charts and widgets shown directly in Chat answers" },
+
+  { id: "sheets", q: "q2-27", status: "exploring", title: "Cogniss Sheets", desc: "New module in the app" },
+  { id: "e-sign", q: "q2-27", status: "exploring", title: "E-sign", desc: "Electronic signature for reports, built into the report flow" },
+  { id: "mobile-app", q: "q2-27", status: "exploring", title: "Mobile app", desc: "Cogniss on iOS and Android" },
+  { id: "analytics-tab", q: "q2-27", status: "exploring", title: "Analytics tab", desc: "Usage and cost analytics in the app" },
+  { id: "private-cloud", q: "q2-27", status: "exploring", title: "Private cloud", desc: "Dedicated EU-only cloud resources per customer" },
+  { id: "on-premise", q: "q2-27", status: "exploring", title: "On-premise", desc: "Option to run Cogniss on customer infrastructure" },
 ];
 const STATUS_ORDER = Object.keys(STATUSES);
 const USED_STATUSES = STATUS_ORDER.filter(s => ITEMS.some(i => i.status === s));
