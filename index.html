@@ -278,8 +278,8 @@ const ITEMS = [
   { id: "deep-search", q: "q4-26", status: "progress", title: "Deep knowledge Database search", desc: "Enhanced functionality in Chat" },
   { id: "full-text-analysis", q: "q4-26", status: "progress", title: "Full text analysis toggle", desc: "Option in Chat to analyse whole documents, not just retrieved excerpts" },
   { id: "knowledge-db-v2", q: "q4-26", status: "progress", title: "Knowledge Database v2", desc: "New data lake with modern and traditional view" },
-  { id: "connectors", q: "q4-26", status: "planned", title: "Connectors expansion", desc: "SharePoint, Google Drive and mail connectors" },
-  { id: "sharepoint", q: "q4-26", status: "planned", title: "SharePoint connector", desc: "Connect SharePoint as a knowledge source" },
+  { id: "connectors", q: "q4-26", status: "planned", title: "Connectors expansion", desc: "SharePoint, Google Drive" },
+  { id: "legal-connectors", q: "q4-26", status: "planned", area: "Connectors", title: "Legal sources connectors", desc: "Normattiva for Italian law and EUR-Lex for EU law (Veynor)" },
   { id: "superadmin-view", q: "q4-26", status: "planned", title: "SuperAdmin view v1", desc: "Implementation of the SuperAdmin dashboard" },
   { id: "admin-dashboards", q: "q4-26", status: "exploring", title: "Admin Dashboards option", desc: "Option for Admins to edit the Dashboards" },
 
@@ -287,7 +287,7 @@ const ITEMS = [
   { id: "alerts", q: "q1-27", status: "planned", title: "Alerts", desc: "New module in the app" },
   { id: "ai-workflows-v2", q: "q1-27", status: "planned", title: "AI workflows v2", desc: "New connectors in workflows and new dashboard widgets" },
   { id: "superadmin-view-v2", q: "q1-27", status: "planned", title: "SuperAdmin view v2", desc: "Next iteration of the SuperAdmin dashboard" },
-  { id: "connectors-2", q: "q1-27", status: "planned", title: "Connectors expansion, phase 2", desc: "Second round of new connectors" },
+  { id: "connectors-phase-2", q: "q1-27", status: "planned", area: "Connectors", title: "Connectors phase 2", desc: "Email (TBD), Stripe, Salesforce, Microsoft 365, SAP, Slack, DocuSign, arXiv, Tavily, Linear" },
   { id: "dash-widgets", q: "q1-27", status: "planned", title: "Dashboard builder widgets expansion", desc: "New widget types (video, video embed, image, plain text)" },
   { id: "graphs-ontology", q: "q1-27", status: "planned", title: "Graphs and Ontology v2", desc: "Upgrade of the live v1: finalizing the full functionality + enhancements" },
   { id: "workflow-widgets", q: "q1-27", status: "planned", title: "Widgets updated by workflows", desc: "Dashboard widgets refreshed automatically from workflow outputs" },
@@ -304,6 +304,7 @@ const ITEMS = [
   { id: "mobile-app", q: "q2-27", status: "exploring", title: "Mobile app", desc: "Cogniss on iOS and Android" },
   { id: "private-cloud", q: "q2-27", status: "exploring", title: "Private cloud", desc: "Dedicated EU-only cloud resources per customer" },
   { id: "on-premise", q: "q2-27", status: "exploring", title: "On-premise", desc: "Option to run Cogniss on customer infrastructure" },
+  { id: "connectors-phase-3", q: "q2-27", status: "exploring", area: "Connectors", title: "Connectors phase 3", desc: "HubSpot, SQL Server, MySQL, Snowflake, Apollo, PTC Creo, iConto" },
 ];
 const STATUS_ORDER = Object.keys(STATUSES);
 const USED_STATUSES = STATUS_ORDER.filter(s => ITEMS.some(i => i.status === s));
